@@ -4,29 +4,15 @@ require('dotenv').config();
 
 const config = require('./config.json').development;
 
-const sequelize = new Sequelize(
-  config.database,
-  config.username,
-  config.password,
-  {
-    host: config.host,
-    dialect: config.dialect,
-    port: config.port,
-    logging: false,
-  }
-);
-
-const db = require('./models')(Sequelize, sequelize);
+const db = require('./models')(Sequelize, config);
 
 const app = express();
 
 app.use(express.json());
 
 db.sequelize
-  .sync()
+  .sync({ force: false })
   .then(async () => {
-    console.log('Connected to the database');
-
     const pizza1 = await db.pizzas.create({
       name: 'Mozzarella',
       description: 'Cheese pizza',
@@ -84,6 +70,7 @@ db.sequelize
       firstFavoritePizzaId: pizza4.id,
       secondFavoritePizzaId: pizza3.id,
     });
+    console.log('Connected to the database');
   })
   .catch((err) => console.log('Error connecting to the database:', err));
 
